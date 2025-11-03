@@ -1,0 +1,50 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using Service.MappingProfiles;
+using ServiceAbstraction;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Service
+{
+    public static class AplicationServiceRegistration
+    {
+        public static IServiceCollection AddApplicationServices(this IServiceCollection Services)
+        {
+            Services.AddAutoMapper(config => config.AddProfile(new ProductProfile()), typeof(Service.AssemblyReference).Assembly);
+
+            Services.AddKeyedScoped<IServiceManager, ServiceManager>("Lazy");
+            Services.AddKeyedScoped<IServiceManager, ServiceManagerWithFactoryDelegate>("Factory");
+
+            Services.AddScoped<IProductService, ProductService>();
+            Services.AddScoped<Func<IProductService>>(provider =>
+            {
+                return () => provider.GetRequiredService<IProductService>();
+            });
+
+            Services.AddScoped<IBasketServices, BasketService>();
+            Services.AddScoped<Func<IBasketServices>>(provider =>
+            {
+                return () => provider.GetRequiredService<IBasketServices>();
+            });
+
+            Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            Services.AddScoped<Func<IAuthenticationService>>(provider =>
+            {
+                return () => provider.GetRequiredService<IAuthenticationService>();
+            });
+
+            Services.AddScoped<IOrderService, OrderService>();
+            Services.AddScoped<Func<IOrderService>>(provider =>
+            {
+                return () => provider.GetRequiredService<IOrderService>();
+            });
+
+            Services.AddScoped<ICacheService, CacheService>();
+
+            return Services;
+        }
+    }
+}
